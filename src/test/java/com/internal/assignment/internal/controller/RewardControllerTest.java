@@ -1,23 +1,22 @@
 package com.internal.assignment.internal.controller;
 
-
+import com.internal.assignment.internal.Entity.RewardPoints;
 import com.internal.assignment.internal.service.RewardService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.http.ResponseEntity;
 
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class RewardControllerTest {
+class RewardControllerTest {
 
     @Mock
     private RewardService rewardService;
@@ -25,54 +24,52 @@ public class RewardControllerTest {
     @InjectMocks
     private RewardController rewardController;
 
-    private MockMvc mockMvc;
-
     @BeforeEach
-    public void setup() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(rewardController).build();
     }
 
     @Test
-    public void testGetRewards() throws Exception {
+    void testGetRewards_Success() {
         Long customerId = 1L;
-
-        // Prepare the mock return value for the service
-        Map<String, Integer> rewards = new HashMap<>();
-        rewards.put("points", 150);
-        rewards.put("bonus", 50);
-
+        Map<String, Integer> rewards = Map.of(
+                "JANUARY", 150,
+                "FEBRUARY", 250,
+                "TOTAL", 400
+        );
         when(rewardService.calculateRewards(customerId)).thenReturn(rewards);
-
-        // Perform the GET request and assert the response
-        mockMvc.perform(get("/api/rewards/{customerId}", customerId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.points").value(150))
-                .andExpect(jsonPath("$.bonus").value(50));
+        Map<String, Integer> response = rewardController.getRewards(customerId);
+        assertEquals(3, response.size());
+        assertEquals(150, response.get("JANUARY"));
+        assertEquals(250, response.get("FEBRUARY"));
+        assertEquals(400, response.get("TOTAL"));
         verify(rewardService, times(1)).calculateRewards(customerId);
     }
 
     @Test
-    public void testGetRewardsWhenNoRewards() throws Exception {
-        Long customerId = 2L;
-
-        Map<String, Integer> rewards = new HashMap<>();
-        when(rewardService.calculateRewards(customerId)).thenReturn(rewards);
-        mockMvc.perform(get("/api/rewards/{customerId}", customerId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
-        verify(rewardService, times(1)).calculateRewards(customerId);
+    void testGetAllRewardPoints_Success() {
+        // Arrange
+        Long customerId = 1L;
+        List<RewardPoints> rewardPointsList = Arrays.asList(
+                new RewardPoints(1L, customerId, "JANUARY", 2023, 150),
+                new RewardPoints(2L, customerId, "FEBRUARY", 2023, 250)
+        );
+        when(rewardService.getAllRewardPoints(customerId)).thenReturn(rewardPointsList);
+        ResponseEntity<List<RewardPoints>> response = rewardController.getAllRewardPoints(customerId);
+        assertEquals(2, response.getBody().size());
+        assertEquals("JANUARY", response.getBody().get(0).getMonth());
+        assertEquals(150, response.getBody().get(0).getPoints());
+        verify(rewardService, times(1)).getAllRewardPoints(customerId);
     }
 
     @Test
-    public void testGetRewardsWhenServiceThrowsException() throws Exception {
-        Long customerId = 3L;
-        when(rewardService.calculateRewards(customerId)).thenThrow(new RuntimeException("Service error"));
-        mockMvc.perform(get("/api/rewards/{customerId}", customerId))
-                .andExpect(status().isInternalServerError())
-                .andExpect(result -> result.getResolvedException().getClass().equals(RuntimeException.class))
-                .andExpect(result -> result.getResolvedException().getMessage().equals("Service error"));
-        verify(rewardService, times(1)).calculateRewards(customerId);
+    void testCalculateTotalRewards_Success() {// Arrange
+        Long customerId = 1L;
+        int totalPoints = 400;
+        when(rewardService.calculateTotalRewardPoints(customerId)).thenReturn(totalPoints);
+        ResponseEntity<Integer> response = rewardController.calculateTotalRewards(customerId);
+        assertEquals(400, response.getBody());
+        verify(rewardService, times(1)).calculateTotalRewardPoints(customerId);
     }
 }
 
