@@ -10,7 +10,6 @@ public interface CustomerTransactionRepository extends JpaRepository<CustomerTra
 
     List<CustomerTransaction> findByCustomerId(Long customerId);
 
-   // List<CustomerTransaction> findByCustomerIdAndDateBetween(Long customerId);
 }
 
 
