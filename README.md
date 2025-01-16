@@ -97,6 +97,7 @@ The application uses a **relational database** with the following schema:
 ## Reward Endpoints
 - `GET /api/rewards/{customerId}`: Calculate and retrieve reward points for a customer.
 - `GET /api/rewards/all/{customerId}`: Retrieve all reward points for a customer.
+- `GET /api/rewards/total/{customerId}`: Calculate and retrieve the total reward points for a customer.
 
 ---
 
