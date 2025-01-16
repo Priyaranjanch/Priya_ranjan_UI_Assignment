@@ -53,7 +53,7 @@ The application is designed using a **layered architecture** to ensure maintaina
                    +---------------------+
                    | Validation Layer    |
                    +---------------------+
-
+```
 # Database Design
 
 The application uses a **relational database** with the following schema:
@@ -137,20 +137,20 @@ The application uses Swagger for API documentation. Once the application is runn
 
 ```bash
 http://localhost:8080/swagger-ui.html
-
-##Testing
+```
+## Testing
 Unit Tests: Test service and controller logic.
 Integration Tests: Verify interactions between components.
 API Tests: Use tools like Postman for testing endpoints.
 
-##Security
+## Security
 Basic Authentication is implemented using Spring Security.
 Define roles and permissions as needed in the SecurityConfig file.
 
-##License
+## License
 This project is licensed under the MIT License.
 
-##Contact
+## Contact
 For queries or issues, please contact:
 
 Email: priyaranjanebi@gmai.com
